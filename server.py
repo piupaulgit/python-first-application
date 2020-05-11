@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
+app.secret_key = 'many random bytes'
 
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -27,9 +28,11 @@ def insert():
         password = request.form['password']
         cur = mysql.connection.cursor()
         cur.execute(
-            "INSERT INTO students (name, email, password) VALUES (%s, %s, %s)", (name, email, password))
+            "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)", (name, email, password))
         mysql.connection.commit()
-        return redirect(url_for('Index'))
+
+        return 'a string'
+        # return redirect(url_for('/'))
 
 
 @app.route('/about')
