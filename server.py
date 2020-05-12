@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
@@ -15,7 +15,11 @@ mysql = MySQL(app)
 
 @app.route('/')
 def hello_world():
-    return render_template('./index.html')
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT  * FROM users")
+    data = cur.fetchall()
+    cur.close()
+    return render_template('./index.html', users=data)
 
 
 @app.route('/insert', methods=['POST'])
@@ -31,8 +35,16 @@ def insert():
             "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)", (name, email, password))
         mysql.connection.commit()
 
-        return 'a string'
+        return jsonify({'response': 'inserted'})
         # return redirect(url_for('/'))
+
+
+@app.route('/delete/<string:id_data>', methods=['GET'])
+def delete(id_data):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM users WHERE id=%s", (id_data,))
+    mysql.connection.commit()
+    return jsonify('Record Has Been Deleted Successfully')
 
 
 @app.route('/about')
