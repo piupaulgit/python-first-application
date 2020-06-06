@@ -67,8 +67,9 @@ def login():
     rv = cur.fetchone()
 
     if bcrypt.check_password_hash(rv['password'],password):
-        access_token = bcrypt.create_access_token(identity = {"name" : rv['name'], "email" : rv['email'], "id" : rv['id']})
-        result = access_token
+        # access_token = bcrypt.create_access_token(identity = {"name" : rv['name'], "email" : rv['email'], "id" : rv['id']})
+        # result = access_token
+        result = jsonify({"error" : "test"})
     else:
         result = jsonify({"error" : "user not found"})
     
