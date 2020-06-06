@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, make_response
 from flask_mysqldb import MySQL
 from flask_cors import CORS
 from datetime import datetime
 from flask_bcrypt import Bcrypt
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 
 app = Flask(__name__)
 
@@ -16,7 +20,7 @@ app.config["JWT_SECRET_KEY"] = "secret"
 
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
-
+jwt = JWTManager(app)
 CORS(app)
 
 
@@ -67,10 +71,19 @@ def login():
     rv = cur.fetchone()
 
     if bcrypt.check_password_hash(rv['password'],password):
-        # access_token = bcrypt.create_access_token(identity = {"name" : rv['name'], "email" : rv['email'], "id" : rv['id']})
-        # result = access_token
-        result = jsonify({"error" : "test"})
+        access_token = create_access_token(identity = {"name" : rv['name'], "email" : rv['email']})
+        result = access_token
+        return jsonify({"token": result})
     else:
         result = jsonify({"error" : "user not found"})
     
     return result
+
+
+# protected Routes
+@app.route('/protected')
+@jwt_required
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
