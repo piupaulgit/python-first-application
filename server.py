@@ -7,6 +7,11 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
 )
+# for regular expression
+import re
+# valid email RE
+# for validating an Email
+validEmailRegex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
 
 app = Flask(__name__)
 
@@ -44,6 +49,8 @@ def register():
         return (jsonify({'message': "Name can not be blank", "status": 500, "data": None}), 500)
     elif str(email) == '':
         return (jsonify({'message': "Email can not be blank", "status": 500, "data": None}), 500)
+    elif re.search(validEmailRegex, str(email)) == None:
+        return (jsonify({'message': "Email Invalid", "status": 500, "data": None}), 500)
     elif str(password) == '':
         return (jsonify({'message': "Password can not be blank", "status": 500, "data": None}), 500)
     else:
