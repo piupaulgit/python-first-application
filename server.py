@@ -37,25 +37,34 @@ def register():
     name = request.get_json()['name']
     email = request.get_json()['email']
     created = datetime.now()
-    password = bcrypt.generate_password_hash(
-        request.get_json()['password']).decode('utf-8')
+    password = request.get_json()["password"]
 
-    cur.execute("INSERT INTO users (name, email, password, created) VALUES ('" +
-                str(name) + "' , '" +
-                str(email) + "' , '" +
-                str(password) + "' , '" +
-                str(created) + "' )")
-    mysql.connection.commit()
+    # check blank values
+    if str(name) == '':
+        return (jsonify({'message': "Name can not be blank", "status": 500, "data": None}), 500)
+    elif str(email) == '':
+        return (jsonify({'message': "Email can not be blank", "status": 500, "data": None}), 500)
+    elif str(password) == '':
+        return (jsonify({'message': "Password can not be blank", "status": 500, "data": None}), 500)
+    else:
+        password = bcrypt.generate_password_hash(
+            request.get_json()['password']).decode('utf-8')
+        cur.execute("INSERT INTO users (name, email, password, created) VALUES ('" +
+                    str(name) + "' , '" +
+                    str(email) + "' , '" +
+                    str(password) + "' , '" +
+                    str(created) + "' )")
+        mysql.connection.commit()
 
-    result = {
-        "id": cur.lastrowid,
-        "name": name,
-        "email": email,
-        "time": created,
-        "message": "user created successfully"
-    }
+        result = {
+            "id": cur.lastrowid,
+            "name": name,
+            "email": email,
+            "time": created,
+            "message": "user created successfully"
+        }
 
-    return jsonify(result)
+        return jsonify(result)
 
 # login api
 @app.route('/user/login', methods=['POST'])
