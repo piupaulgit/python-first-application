@@ -44,11 +44,17 @@ def register():
     created = datetime.now()
     password = request.get_json()["password"]
 
+    # if email alreadt registered
+    duplicateEmail = bool(cur.execute(
+        "SELECT * FROM users where email = '" + str(email) + "'"))
+
     # check blank values
     if str(name) == '':
         return (jsonify({'message': "Name can not be blank", "status": 500, "data": None}), 500)
     elif str(email) == '':
         return (jsonify({'message': "Email can not be blank", "status": 500, "data": None}), 500)
+    elif(duplicateEmail):
+        return (jsonify({'message': "Email already exits", "status": 500, "data": None}), 500)
     elif re.search(validEmailRegex, str(email)) == None:
         return (jsonify({'message': "Email Invalid", "status": 500, "data": None}), 500)
     elif str(password) == '':
