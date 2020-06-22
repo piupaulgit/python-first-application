@@ -24,10 +24,6 @@ jwt = JWTManager(app)
 CORS(app)
 
 
-
-
-
-
 # test api
 @app.route('/')
 def home():
@@ -41,20 +37,22 @@ def register():
     name = request.get_json()['name']
     email = request.get_json()['email']
     created = datetime.now()
-    password = bcrypt.generate_password_hash(request.get_json()['password']).decode('utf-8')
+    password = bcrypt.generate_password_hash(
+        request.get_json()['password']).decode('utf-8')
 
-    cur.execute("INSERT INTO users (name, email, password, created) VALUES ('" + 
-    str(name) + "' , '" + 
-    str(email) + "' , '"+ 
-    str(password) + "' , '" + 
-    str(created) + "' )" )
+    cur.execute("INSERT INTO users (name, email, password, created) VALUES ('" +
+                str(name) + "' , '" +
+                str(email) + "' , '" +
+                str(password) + "' , '" +
+                str(created) + "' )")
     mysql.connection.commit()
 
     result = {
-        "name" : name,
-        "email" : email,
-        "date" : created,
-        "message" : "user created successfully"
+        "id": cur.lastrowid,
+        "name": name,
+        "email": email,
+        "time": created,
+        "message": "user created successfully"
     }
 
     return jsonify(result)
@@ -70,13 +68,14 @@ def login():
     cur.execute("SELECT * FROM users where email = '" + str(email) + "'")
     rv = cur.fetchone()
 
-    if bcrypt.check_password_hash(rv['password'],password):
-        access_token = create_access_token(identity = {"name" : rv['name'], "email" : rv['email']})
+    if bcrypt.check_password_hash(rv['password'], password):
+        access_token = create_access_token(
+            identity={"name": rv['name'], "email": rv['email']})
         result = access_token
         return jsonify({"token": result})
     else:
-        result = jsonify({"error" : "user not found"})
-    
+        result = jsonify({"error": "user not found"})
+
     return result
 
 
