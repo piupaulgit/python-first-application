@@ -87,18 +87,22 @@ def login():
     password = request.get_json()['password']
     result = ''
 
-    cur.execute("SELECT * FROM users where email = '" + str(email) + "'")
-    rv = cur.fetchone()
+    hasUser = bool(cur.execute(
+        "SELECT * FROM users where email = '" + str(email) + "'"))
 
-    if bcrypt.check_password_hash(rv['password'], password):
-        access_token = create_access_token(
-            identity={"name": rv['name'], "email": rv['email']})
-        result = access_token
-        return jsonify({"token": result})
-    else:
-        result = jsonify({"error": "user not found"})
-
-    return result
+    if str(email) == '':
+        return (jsonify({'message': "Please provide Email", "status": 500, "data": None}), 500)
+    elif hasUser == False:
+        return (jsonify({'message': "There is no user with this email", "status": 500, "data": None}), 500)
+    elif str(password) == '':
+        return (jsonify({'message': "Pasword should not be blank", "status": 500, "data": None}), 500)
+    elif hasUser:
+        rv = cur.fetchone()
+        if bcrypt.check_password_hash(rv['password'], password):
+            access_token = create_access_token(
+                identity={"name": rv['name'], "email": rv['email']})
+            result = access_token
+            return jsonify({"token": result, "userEmail": rv['email']})
 
 
 # protected Routes
