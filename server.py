@@ -103,6 +103,8 @@ def login():
                 identity={"name": rv['name'], "email": rv['email']})
             result = access_token
             return jsonify({"token": result, "userEmail": rv['email']})
+        else:
+            return (jsonify({'message': "Password is wrong", "status": 500, "data": None}), 500)
 
 
 # protected Routes
